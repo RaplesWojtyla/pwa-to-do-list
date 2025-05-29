@@ -1,130 +1,324 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
-	<meta charset="UTF-8">
-	<title>Offline</title>
-	<style>
-		body {
-			background-image: linear-gradient(100deg, #575656, #062e3f);
-			min-height: 100vh;
-			margin: 0;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: flex-start;
-			font-family: 'Segoe UI', Arial, sans-serif;
-		}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Memory Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            text-align: center;
+        }
 
-		h1 {
-			margin-top: 60px;
-			color: white;
-			font-size: 2.2em;
-			letter-spacing: 1px;
-		}
+        h1 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
 
-		h3 {
-			color: #fff;
-		}
+        h3 {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
 
-		p {
-			color: #333;
-			font-size: 1.1em;
-			font-weight: bold;
-		}
+        #game-info {
+            display: flex;
+            justify-content: space-around;
+            width: 90%;
+            max-width: 400px;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
 
-		#game-area {
-			background: rgba(255, 255, 255, 0.95);
-			box-shadow: 0 8px 24px rgba(60, 60, 60, 0.12);
-			border-radius: 18px;
-			padding: 32px 28px 24px 28px;
-			margin-top: 30px;
-			display: inline-block;
-			min-width: 320px;
-		}
+        #game-info p {
+            margin: 5px 10px;
+            font-size: 1em;
+            color: #34495e;
+        }
 
-		#game-area p {
-			margin: 12px 0;
-		}
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
 
-		input[type="number"] {
-			width: 60px;
-			padding: 8px;
-			border: 1.5px solid #43c6ac;
-			border-radius: 8px;
-			font-size: 1.1em;
-			margin-right: 10px;
-			outline: none;
-			transition: border 0.2s;
-		}
+        .card {
+            background-color: transparent;
+            aspect-ratio: 3/4;
+            cursor: pointer;
+            border-radius: 8px;
+        }
 
-		input[type="number"]:focus {
-			border: 1.5px solid #2e8b7a;
-			background: #f0fdfa;
-		}
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
 
-		button {
-			background: linear-gradient(90deg, #43c6ac 60%, #191654 100%);
-			color: #fff;
-			border: none;
-			border-radius: 8px;
-			padding: 8px 22px;
-			font-size: 1em;
-			cursor: pointer;
-			margin: 8px 4px 0 0;
-			box-shadow: 0 2px 8px rgba(67, 198, 172, 0.08);
-			transition: background 0.2s, transform 0.1s;
-		}
+        .card.is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
 
-		button:hover {
-			background: linear-gradient(90deg, #191654 60%, #43c6ac 100%);
-			transform: translateY(-2px) scale(1.04);
-		}
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; 
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 2em; 
+        }
+        
+        
+        @media (max-width: 400px) {
+            .card-face {
+                font-size: 1.5em;
+            }
+        }
 
-		#result {
-			font-weight: bold;
-			font-size: 1.15em;
-			margin-top: 16px;
-			min-height: 24px;
-		}
-	</style>
+
+        .card-front {
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            color: white;
+            
+        }
+         .card-front::after { 
+            content: '?';
+            font-size: 1.5em; 
+            font-weight: bold;
+            color: rgba(255,255,255,0.7);
+        }
+
+
+        .card-back {
+            background-color: #ecf0f1; 
+            color: #2c3e50;
+            transform: rotateY(180deg);
+        }
+
+        .card.matched .card-back {
+             background-color: #a9dfbf; 
+             box-shadow: 0 0 8px #2ecc71; 
+        }
+        .card.matched {
+            cursor: default; 
+        }
+
+
+        #game-status {
+            margin-top: 25px;
+        }
+
+        #status-message {
+            font-size: 1.2em;
+            color: #27ae60; 
+            min-height: 25px;
+            font-weight: bold;
+        }
+
+        .action-button {
+            background: #3498db; 
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .action-button:hover {
+            background: #2980b9; 
+        }
+    </style>
 </head>
 
 <body>
-	<h1>Kamu sedang offline!</h1>
-	<h3>Coba main game ini dulu:</h3>
-	<div id="game-area">
-		<p>Tebak angka antara 1 sampai 10!</p>
-		<input type="number" id="guess" min="1" max="10" />
-		<button onclick="checkGuess()">Tebak!</button>
-		<p id="result"></p>
-		<button onclick="resetGame()">Main Lagi</button>
-	</div>
-	<script>
-		let randomNumber = Math.floor(Math.random() * 10) + 1;
-		let attempts = 0;
+    <h1>Kamu Sedang Offline!</h1>
+    <h3>Latih ingatanmu dengan mencocokkan pasangan kartu ini:</h3>
 
-		function checkGuess() {
-			const guess = parseInt(document.getElementById('guess').value);
-			attempts++;
-			if (guess === randomNumber) {
-				document.getElementById('result').textContent = `Benar! Kamu menebak dalam ${attempts} percobaan.`;
-			} else if (guess < randomNumber) {
-				document.getElementById('result').textContent = 'Terlalu kecil!';
-			} else if (guess > randomNumber) {
-				document.getElementById('result').textContent = 'Terlalu besar!';
-			} else {
-				document.getElementById('result').textContent = 'Masukkan angka yang valid!';
-			}
-		}
+    <div id="game-info">
+        <p>Percobaan: <span id="attempts-count">0</span></p>
+        <p>Pasangan: <span id="pairs-found-count">0 / 8</span></p>
+    </div>
 
-		function resetGame() {
-			randomNumber = Math.floor(Math.random() * 10) + 1;
-			attempts = 0;
-			document.getElementById('guess').value = '';
-			document.getElementById('result').textContent = '';
-		}
-	</script>
+    <div id="game-board">
+        </div>
+
+    <div id="game-status">
+        <p id="status-message"></p>
+        <button id="restart-button" class="action-button" onclick="startGame()" style="display:none;">Main Lagi</button>
+    </div>
+
+    <script>
+        const emojis = ['🍎', '🍌', '🍒', '🍓', '🍇', '🍊', '🍍', '🍉']; 
+        let gameCardObjects = []; 
+        let flippedCardElements = []; 
+        let matchedPairs = 0;
+        let attempts = 0;
+        let canFlip = true; 
+
+        let gameBoardEl;
+        let attemptsCountEl;
+        let pairsFoundCountEl;
+        let statusMessageEl;
+        let restartButtonEl;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function prepareGameCards() {
+            gameCardObjects = [];
+            const allSymbols = [...emojis, ...emojis]; 
+            shuffleArray(allSymbols);
+
+            allSymbols.forEach((symbol, index) => {
+                gameCardObjects.push({
+                    id: index,
+                    symbol: symbol,
+                    isFlipped: false,
+                    isMatched: false
+                });
+            });
+        }
+
+        function createBoard() {
+            gameBoardEl.innerHTML = ''; 
+            gameCardObjects.forEach(cardData => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.id = cardData.id; 
+
+                const cardInner = document.createElement('div');
+                cardInner.classList.add('card-inner');
+
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-face', 'card-front');
+
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-face', 'card-back');
+                cardBack.textContent = cardData.symbol;
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                cardElement.appendChild(cardInner);
+
+                cardElement.addEventListener('click', () => handleCardClick(cardElement, cardData));
+                gameBoardEl.appendChild(cardElement);
+            });
+        }
+
+        function handleCardClick(cardElement, cardData) {
+            if (!canFlip || cardData.isFlipped || cardData.isMatched || flippedCardElements.length >= 2) {
+                return; 
+            }
+
+            cardData.isFlipped = true;
+            cardElement.classList.add('is-flipped'); 
+            flippedCardElements.push({ element: cardElement, data: cardData });
+
+            if (flippedCardElements.length === 2) {
+                attempts++;
+                updateGameInfo();
+                canFlip = false; 
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCardElements;
+
+            if (card1.data.symbol === card2.data.symbol) { 
+                card1.data.isMatched = true;
+                card2.data.isMatched = true;
+                card1.element.classList.add('matched');
+                card2.element.classList.add('matched');
+                matchedPairs++;
+                updateGameInfo();
+                flippedCardElements = [];
+                canFlip = true;
+                checkWinCondition();
+            } else { 
+                setTimeout(() => {
+                    card1.element.classList.remove('is-flipped');
+                    card2.element.classList.remove('is-flipped');
+                    card1.data.isFlipped = false;
+                    card2.data.isFlipped = false;
+                    flippedCardElements = [];
+                    canFlip = true;
+                }, 1000); 
+            }
+        }
+
+        function checkWinCondition() {
+            if (matchedPairs === emojis.length) {
+                statusMessageEl.textContent = `Hebat! Kamu menemukan semua ${emojis.length} pasangan dalam ${attempts} percobaan.`;
+                restartButtonEl.style.display = 'inline-block';
+                canFlip = false; 
+            }
+        }
+
+        function updateGameInfo() {
+            attemptsCountEl.textContent = attempts;
+            pairsFoundCountEl.textContent = `${matchedPairs} / ${emojis.length}`;
+        }
+
+        function startGame() {
+            
+            gameBoardEl = document.getElementById('game-board');
+            attemptsCountEl = document.getElementById('attempts-count');
+            pairsFoundCountEl = document.getElementById('pairs-found-count');
+            statusMessageEl = document.getElementById('status-message');
+            restartButtonEl = document.getElementById('restart-button');
+
+            
+            matchedPairs = 0;
+            attempts = 0;
+            flippedCardElements = [];
+            canFlip = true;
+            statusMessageEl.textContent = '';
+            restartButtonEl.style.display = 'none';
+            pairsFoundCountEl.textContent = `0 / ${emojis.length}`;
+
+
+            prepareGameCards();
+            createBoard();
+            updateGameInfo();
+        }
+
+        
+        window.onload = startGame;
+    </script>
 </body>
 
 </html>
